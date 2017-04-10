@@ -114,6 +114,7 @@ function preload() {
     game.load.image('addLight', 'assets/addLightSource.png');
     game.load.image('addRobot', 'assets/addRobot.png');
     game.load.image('removeRobot', 'assets/removeRobot.png');
+
 }
 
 //Create
