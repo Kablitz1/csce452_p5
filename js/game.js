@@ -8,6 +8,11 @@ var lightToggle = true; //says whether clicking will place a light source
 var lightSources; //group containing light sprites
 var vehicleArray;
 
+
+//BUTTON BUTTONS
+var addLightSourceButton;
+var addRobotButton;
+var removeRobotButton;
 //BOOL BUTTONS
 var addLightSourceBool;
 var addRobotBool;
@@ -106,6 +111,9 @@ var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, creat
 //preload assets needed for game
 function preload() {
     game.load.image('sun', 'assets/sun.png');
+    game.load.image('addLight', 'assets/addLightSource.png');
+    game.load.image('addRobot', 'assets/addRobot.png');
+    game.load.image('removeRobot', 'assets/removeRobot.png');
 }
 
 //Create
@@ -114,8 +122,13 @@ function preload() {
 function create() {
 
     //SET BACKGROUND COLOR
-    game.stage.backgroundColor = "#36b3de"// VERY RELAXING :)
+    game.stage.backgroundColor = "#36b3de"; // VERY RELAXING :)
 
+
+    //ADDING BUTTONS
+    addLightSourceButton = game.add.button(game.width - 100,10,'addLight');
+    addRobotButton= game.add.button(game.width - 100,70,'addRobot');
+    removeRobotButton= game.add.button(game.width - 100,130,'removeRobot');
 
     //CREATING VEHICLE GROUP
     vehicleArray = game.add.group();
