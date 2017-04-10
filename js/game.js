@@ -76,7 +76,7 @@ class BVehicle{
     }
 
     calcIntensity(sOut1, PosX, PosY, sens1X, sens1Y) {
-        
+
     }
 
     //based on light position, own sensor position will give intensity of light
