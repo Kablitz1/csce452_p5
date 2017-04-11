@@ -23,38 +23,30 @@ var removeRobotBool;
 //Braitenburg Vehicle Class
 //-----------------------------------------------------------------------------
 
+
+//WORKS LIKE A CLASS ODDLY ENOUGH
 BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
+
     Phaser.Sprite.call(this, game, initialLocationArray[0], initialLocationArray[1], 'robot'); //extends Sprite
+    this.K_matrix = K_matrix;
+    this.PosX = initialLocationArray[0]; //int
+    this.PosY = initialLocationArray[1]; //int
+    this.orient = initialOrientation;//degrees
 
-};
+    //position of sensors
+    //this.sens1X = //NOTE:: we have to initialize this
+    //this.sens1Y = //NOTE:: we have to initialize this
 
-BraitenbergRobot.prototype = Object.create(Phaser.Sprite.prototype);
-BraitenbergRobot.prototype.constructor = BraitenbergRobot;
+    //intensity of sensors
+    this.sens1S = 0;
+    this.sens2S = 0;
 
-class BVehicle{
-    constructor(matK, initialLocationArray, initOrient){
-        //body info
-        this.matK = matK; //2x2 mat
-        this.PosX = initialLocationArray[0]; //int
-        this.PosY = initialLocationArray[1]; //int
-        this.orient = initOrient;//degrees
-
-        //position of sensors
-        //this.sens1X = //NOTE:: we have to initialize this
-        //this.sens1Y = //NOTE:: we have to initialize this
-
-        //intensity of sensors
-        this.sens1S = 0;
-        this.sens2S = 0;
-
-        //wheel info
-        this.wheelSize = [20,20]; // WE GET TO SET OUR OWN WHEEL SIZE
-        this.w1Speed = 0; //left wheel
-        this.w2Speed = 1;
-    }
-
+    //wheel info
+    this.wheelSize = [20,20]; // WE GET TO SET OUR OWN WHEEL SIZE
+    this.w1Speed = 0; //left wheel
+    this.w2Speed = 1;
     //moves robot according to where each lightPos is
-    moveRobot(lightPosAr){
+    function moveRobot(lightPosAr){
         //for each lightPos in array, sensor 1
         var sOut1 = 0;
         for(i = 0; i < lightPosAr.length; i++){
@@ -84,7 +76,7 @@ class BVehicle{
     }
 
     //based on light position, own sensor position will give intensity of light
-    calcIntensity(sOut, lightPosX, lightPosY, sensorX, sensorY){
+    function calcIntensity(sOut, lightPosX, lightPosY, sensorX, sensorY){
         //calculate distance d btwn lightPos and sensor
         var X = math.abs(lightPosX - sensorX);
         var Y = math.abs(lightPosY - sensorY);
@@ -95,13 +87,17 @@ class BVehicle{
     }
 
     //Based on sensor output and matrix K, determine speed of the wheels
-    calcWheelSpeed(){
+    function calcWheelSpeed(){
         //Each wheel speed is the dot product of its corresponding row of K and the array of the two sensors
         this.w1Speed = math.dot([this.matK.get(0,0), this.matK.get(0,1)], [this.sens1S, this.sens2S]);
         this.w2Speed = math.dot([this.matK.get(1,0), this.matK.get(1,1)], [this.sens1S, this.sens2S]);
     }
+};
 
-}
+//MAKES THE ROBOT BECOME AN OBJECT
+BraitenbergRobot.prototype = Object.create(Phaser.Sprite.prototype);
+BraitenbergRobot.prototype.constructor = BraitenbergRobot;
+
 
 function addLightSource(game){
     //spawn light source at click location, and add to array
@@ -142,8 +138,6 @@ function create() {
     //SET BACKGROUND COLOR
     game.stage.backgroundColor = "#36b3de"; // VERY RELAXING :)
 
-    var robot = new BraitenbergRobot(0,[100,100],0);
-    game.add.existing(robot);
     //ADDING BUTTONS
     addLightSourceButton = game.add.button(game.width - 100,10,'addLight',addLightSourceButtonListener,this,0,0,1,0);
     addRobotButton= game.add.button(game.width - 100,70,'addRobot',addRobotButtonListener,this,0,0,1,0);
@@ -289,7 +283,8 @@ function addRobotButtonListener(){
     }
 
     //CREATE A NEW VEHICLE AND ADD IT TO THE DICTIONARY TO KEEP TRACK OF THEM BY NAME
-    robotDict[robotName] = new BVehicle(K_matrix,locationArray,0)
+    robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,0);
+    game.add.existing(robotDict[robotName]);
 
 }
 function removeRobotButtonListener(){
