@@ -284,14 +284,19 @@ function addRobotButtonListener(){
 
     //CREATE A NEW VEHICLE AND ADD IT TO THE DICTIONARY TO KEEP TRACK OF THEM BY NAME
     robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,0);
-    game.add.existing(robotDict[robotName]);
+    var sprite = game.add.existing(robotDict[robotName]);
 
 }
+
 function removeRobotButtonListener(){
     //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
     addLightSourceBool = false;
     addRobotBool = false;
     removeRobotBool = true;
-    var removeRobotName = promt("Enter Robot Name");
+    var removeRobotName = prompt("Enter Robot Name");
+    if(removeRobotName in robotDict)
+    {
+        robotDict[removeRobotName].destroy();
+    }
 
 }
