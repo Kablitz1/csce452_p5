@@ -1,4 +1,3 @@
-
 //-----------------------------------------------------------------------------
 //Global Variables
 //-----------------------------------------------------------------------------
@@ -23,6 +22,15 @@ var removeRobotBool;
 //-----------------------------------------------------------------------------
 //Braitenburg Vehicle Class
 //-----------------------------------------------------------------------------
+
+BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
+    Phaser.Sprite.call(this, game, initialLocationArray[0], initialLocationArray[1], 'robot'); //extends Sprite
+
+};
+
+BraitenbergRobot.prototype = Object.create(Phaser.Sprite.prototype);
+BraitenbergRobot.prototype.constructor = BraitenbergRobot;
+
 class BVehicle{
     constructor(matK, initialLocationArray, initOrient){
         //body info
@@ -119,6 +127,7 @@ var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, creat
 //preload assets needed for game
 function preload() {
     game.load.image('sun', 'assets/sun.png');
+    game.load.image('robot','assets/vehicle.png');
     game.load.spritesheet('addLight', 'assets/addLightSource.png',75,50);
     game.load.spritesheet('addRobot', 'assets/addRobot.png',75,50);
     game.load.spritesheet('removeRobot', 'assets/removeRobot.png',75,50);
@@ -133,7 +142,8 @@ function create() {
     //SET BACKGROUND COLOR
     game.stage.backgroundColor = "#36b3de"; // VERY RELAXING :)
 
-
+    var robot = new BraitenbergRobot(0,[100,100],0);
+    game.add.existing(robot);
     //ADDING BUTTONS
     addLightSourceButton = game.add.button(game.width - 100,10,'addLight',addLightSourceButtonListener,this,0,0,1,0);
     addRobotButton= game.add.button(game.width - 100,70,'addRobot',addRobotButtonListener,this,0,0,1,0);
