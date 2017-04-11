@@ -4,17 +4,17 @@
 //-----------------------------------------------------------------------------
 
 //light source handling
-var lightToggle = true; //says whether clicking will place a light source
 var lightSources; //group containing light sprites
-var vehicleArray;
+var robotArray;
 
 
 //BUTTON BUTTONS
 var addLightSourceButton;
 var addRobotButton;
 var removeRobotButton;
+
 //BOOL BUTTONS
-var addLightSourceBool;
+var addLightSourceBool; //says whether clicking will place a light source
 var addRobotBool;
 var removeRobotBool;
 
@@ -99,6 +99,13 @@ function addLightSource(game){
     lightSources.add(game.add.sprite(game.input.x, game.input.y, 'sun'));
 }
 
+function addRobot(game){
+
+}
+
+function removeRobot(game){
+
+}
 //-----------------------------------------------------------------------------
 //Phaser Game Functionality
 //-----------------------------------------------------------------------------
@@ -111,9 +118,9 @@ var game = new Phaser.Game(1280, 720, Phaser.AUTO, '', { preload: preload, creat
 //preload assets needed for game
 function preload() {
     game.load.image('sun', 'assets/sun.png');
-    game.load.image('addLight', 'assets/addLightSource.png');
-    game.load.image('addRobot', 'assets/addRobot.png');
-    game.load.image('removeRobot', 'assets/removeRobot.png');
+    game.load.spritesheet('addLight', 'assets/addLightSource.png',75,50);
+    game.load.spritesheet('addRobot', 'assets/addRobot.png',75,50);
+    game.load.spritesheet('removeRobot', 'assets/removeRobot.png',75,50);
 
 }
 
@@ -127,14 +134,14 @@ function create() {
 
 
     //ADDING BUTTONS
-    addLightSourceButton = game.add.button(game.width - 100,10,'addLight');
-    addRobotButton= game.add.button(game.width - 100,70,'addRobot');
-    removeRobotButton= game.add.button(game.width - 100,130,'removeRobot');
+    addLightSourceButton = game.add.button(game.width - 100,10,'addLight',addLightSourceButtonListener,this,0,0,1,0);
+    addRobotButton= game.add.button(game.width - 100,70,'addRobot',addRobotButtonListener,this,0,0,1,0);
+    removeRobotButton= game.add.button(game.width - 100,130,'removeRobot',removeRobotButtonListener,this,0,0,1,0);
 
-    //CREATING VEHICLE GROUP
-    vehicleArray = game.add.group();
-    vehicleArray.setAll('checkWorldBounds', true);
-    vehicleArray.setAll('outOfBoundsKill', true); //WE MAY WANT TO REMOVE THIS
+    //CREATING ROBOT GROUP
+    robotArray = game.add.group();
+    robotArray.setAll('checkWorldBounds', true);
+    robotArray.setAll('outOfBoundsKill', true); //WE MAY WANT TO REMOVE THIS
 
     //CREATING LIGHT SOURCES GROUP
     lightSources = game.add.group();
@@ -161,12 +168,26 @@ var frameDelay = 0;
 function update() {
     frameDelay++;
     if(frameDelay > 6){
-        if(lightToggle){
-            if(game.input.activePointer.isDown){
+        //I LIMITED THE RANGE YOU CAN ADD SOMETHING.
+        if(addLightSourceBool){
+            if(game.input.activePointer.isDown && game.input.mousePointer.x < 1175){
                 addLightSource(game);
                 console.log("Num Lights: "+lightSources.length);
             }
         }
+        else if(addRobotBool) {
+            if (game.input.activePointer.isDown && game.input.mousePointer.x < 1175) {
+                addRobot(game);
+                console.log("Num Robots: " + robotArray.length);
+            }
+        }
+        else if(removeRobotBool) {
+            if (game.input.activePointer.isDown && game.input.mousePointer.x < 1175) {
+                removeRobot(game);
+                console.log("Num Robots: " + robotArray.length);
+            }
+        }
+
         frameDelay = 0;
     }
 
@@ -182,3 +203,21 @@ function render() {
 //-----------------------------------------------------------------------------
 //Button Functions 
 //-----------------------------------------------------------------------------
+function addLightSourceButtonListener(){
+    //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
+    addLightSourceBool = true;
+    addRobotBool = false;
+    removeRobotBool = false;
+}
+function addRobotButtonListener(){
+    //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
+    addLightSourceBool = false;
+    addRobotBool = true;
+    removeRobotBool = false;
+}
+function removeRobotButtonListener(){
+    //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
+    addLightSourceBool = false;
+    addRobotBool = false;
+    removeRobotBool = true;
+}
