@@ -5,8 +5,8 @@
 
 //light source handling
 var lightSources; //group containing light sprites
-var robotArray;
-
+var robotImageArray;
+var robotDict = {};
 
 //BUTTON BUTTONS
 var addLightSourceButton;
@@ -24,11 +24,11 @@ var removeRobotBool;
 //Braitenburg Vehicle Class
 //-----------------------------------------------------------------------------
 class BVehicle{
-    constructor(matK, initPosX, initPosY, initOrient, wheelSize){
+    constructor(matK, initialLocationArray, initOrient){
         //body info
         this.matK = matK; //2x2 mat
-        this.PosX = initPosX; //int
-        this.PosY = initPosY; //int
+        this.PosX = initialLocationArray[0]; //int
+        this.PosY = initialLocationArray[1]; //int
         this.orient = initOrient;//degrees
 
         //position of sensors
@@ -40,7 +40,7 @@ class BVehicle{
         this.sens2S = 0;
 
         //wheel info
-        this.wheelSize = wheelSize;
+        this.wheelSize = [20,20]; // WE GET TO SET OUR OWN WHEEL SIZE
         this.w1Speed = 0; //left wheel
         this.w2Speed = 1;
     }
@@ -75,14 +75,15 @@ class BVehicle{
 
     }
 
-    calcIntensity(sOut1, PosX, PosY, sens1X, sens1Y) {
-
-    }
-
     //based on light position, own sensor position will give intensity of light
     calcIntensity(sOut, lightPosX, lightPosY, sensorX, sensorY){
         //calculate distance d btwn lightPos and sensor
-        sOut += 100/d;
+        var X = math.abs(lightPosX - sensorX);
+        var Y = math.abs(lightPosY - sensorY);
+        var distance = math.sqrt(X*X + Y*Y);
+        if(distance < 1)
+            distance = 1;
+        return Math.round(100/distance);
     }
 
     //Based on sensor output and matrix K, determine speed of the wheels
@@ -139,24 +140,14 @@ function create() {
     removeRobotButton= game.add.button(game.width - 100,130,'removeRobot',removeRobotButtonListener,this,0,0,1,0);
 
     //CREATING ROBOT GROUP
-    robotArray = game.add.group();
-    robotArray.setAll('checkWorldBounds', true);
-    robotArray.setAll('outOfBoundsKill', true); //WE MAY WANT TO REMOVE THIS
+    robotImageArray = game.add.group();
+    robotImageArray.setAll('checkWorldBounds', true);
+    robotImageArray.setAll('outOfBoundsKill', true); //WE MAY WANT TO REMOVE THIS
 
     //CREATING LIGHT SOURCES GROUP
     lightSources = game.add.group();
     lightSources.setAll('checkWorldBounds', true);
     lightSources.setAll('outOfBoundsKill', true);
-
-
-
-
-    //prompt example...
-    /*
-     var name = prompt("Please enter your name", "Anonymous");
-     if(name) {
-     console.log("Hello "+name+", nice to meet you!");
-     }*/
 }
 
 //Update
@@ -178,13 +169,13 @@ function update() {
         else if(addRobotBool) {
             if (game.input.activePointer.isDown && game.input.mousePointer.x < 1175) {
                 addRobot(game);
-                console.log("Num Robots: " + robotArray.length);
+                console.log("Num Robots: " + robotImageArray.length);
             }
         }
         else if(removeRobotBool) {
             if (game.input.activePointer.isDown && game.input.mousePointer.x < 1175) {
                 removeRobot(game);
-                console.log("Num Robots: " + robotArray.length);
+                console.log("Num Robots: " + robotImageArray.length);
             }
         }
 
@@ -209,15 +200,93 @@ function addLightSourceButtonListener(){
     addRobotBool = false;
     removeRobotBool = false;
 }
+
+//NEED TO CHECK FOR VALID INPUT FROM PROMTS
+var accurateAddRobotInformationBool;
+
+//SIMPLE FUNCTION FOR PARSING STRING
+function parseKmapString(KmapString) {
+    //SPLIT STRING BY COMMA
+    var tempArray = KmapString.split(',');
+    //ERROR CHECKING
+    if (tempArray.length != 4)
+    {
+        accurateAddRobotInformationBool = false;
+        return 0;
+    }
+    //TURN FROM STRING TO INT
+    for(i = 0; i < tempArray.length; i++)
+    {
+        tempArray[i] = parseInt(tempArray[i]);
+    }
+
+    //GET INTO 2X2 ARRAY AND RETURN
+    return [[tempArray[0],tempArray[1]],[tempArray[2],tempArray[3]]];
+}
+//PARSING STRING OF LOCATION
+function parseNewRobotLocation(newRobotLocation) {
+    //SPLIT STRING
+    var array = newRobotLocation.split(',');
+    //SIMPLE ERROR CHECKING
+    if (array.length != 2)
+    {
+        accurateAddRobotInformationBool = false;
+        return 0;
+    }
+    //TURN STRING TO INT
+    for(i = 0; i < array.length; i++)
+    {
+        array[i] = parseInt(array[i]);
+    }
+    return array;
+}
+
+//WHAT TO DO WHEN WE CLICK ON ADD ROBOT BUTTON
 function addRobotButtonListener(){
     //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
     addLightSourceBool = false;
     addRobotBool = true;
     removeRobotBool = false;
+    accurateAddRobotInformationBool = true;
+
+    //USER PROMPTS TO GET INFORMATION FROM USER
+    //KMATRIX
+    var KmapString = prompt("Enter K Map"); //k11,k12,k21,k22 <- this format
+    //PARSE THAT STRING
+    var K_matrix = parseKmapString(KmapString);
+    //IF THEY DID IT RIGHT
+    if(accurateAddRobotInformationBool) {
+        //GET LOCATION
+        var newRobotLocation = prompt("Enter Desired Location (x,y)"); //x,y <- this format
+        var locationArray = parseNewRobotLocation(newRobotLocation);
+    }
+    else
+    {
+        //tell the user it got it wrong
+        window.alert("Bad Information!");
+        accurateAddRobotInformationBool = true;
+        return 0;
+    }
+    //IF THEY GET THAT RIGHT TOO
+    if(accurateAddRobotInformationBool)
+        //GET THE NAME
+        var robotName = prompt("Enter Robot Name"); //FOR REMOVING
+    else{
+        //tell the user it got it wrong
+        window.alert("Bad Information!");
+        accurateAddRobotInformationBool = true;
+        return 0;
+    }
+
+    //CREATE A NEW VEHICLE AND ADD IT TO THE DICTIONARY TO KEEP TRACK OF THEM BY NAME
+    robotDict[robotName] = new BVehicle(K_matrix,locationArray,0)
+
 }
 function removeRobotButtonListener(){
     //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
     addLightSourceBool = false;
     addRobotBool = false;
     removeRobotBool = true;
+    var removeRobotName = promt("Enter Robot Name");
+
 }
