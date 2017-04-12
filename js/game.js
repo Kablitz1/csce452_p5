@@ -96,8 +96,10 @@ BraitenbergRobot.prototype.update = function() {
         var velocityRightWheel = thisRobot.w2Speed*35;
 
         //THEN USING THAT SPEED FIND OUT HOW FAR A ROBOT WOULD GO PER SECOND
-        //UPDATE THE LOCATION OF THE SENSORS WITH RESPECT TO THE ANCHOR POINT.
-        //THE SIGNS CHANGE DEPENDING ON THE ANGLE OF THE ROBOT.
+
+
+
+        //UPDATE THE LOCATION OF THE SENSORS WITH RESPECT TO THE ROTATION POINT.
         updateSensorLocation(thisRobot);
     }
 
@@ -111,17 +113,17 @@ BraitenbergRobot.prototype.update = function() {
     //I USED THE ROTATION FORMULA FOR THIS VALUE. THE SIGNS MAY NEED TO BE FLIPPED
     function updateSensorLocation(thisRobot){
         // ORIGINAL POSITION IT WOULD BE IF THE ANGLE WAS 0
-        var L_SensorDefaultLocationX =  thisRobot.PosX+23;
-        var L_SensorDefaultLocationY = thisRobot.PosY+6;
-        var R_SensorDefaultLocationX = thisRobot.PosX+58;
-        var R_SensorDefaultLocationY = thisRobot.PosY+6;
+        var L_SensorDefaultLocationX =  23;
+        var L_SensorDefaultLocationY = 6;
+        var R_SensorDefaultLocationX = 58;
+        var R_SensorDefaultLocationY = 6;
 
 
 
-        thisRobot.L_SensorLocationX = L_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-L_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle));
-        thisRobot.L_SensorLocationY = L_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+L_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle));
-        thisRobot.R_SensorLocationX = R_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-R_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle));
-        thisRobot.R_SensorLocationY = R_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+R_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle));
+        thisRobot.L_SensorLocationX = thisRobot.PosX + Math.round(L_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-L_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
+        thisRobot.L_SensorLocationY = thisRobot.PosY+ Math.round(L_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+L_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
+        thisRobot.R_SensorLocationX = thisRobot.PosX+ Math.round(R_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-R_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
+        thisRobot.R_SensorLocationY = thisRobot.PosY+ Math.round(R_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+R_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
     }
 
     //based on light position, own sensor position will give intensity of light
@@ -301,7 +303,7 @@ function addRobotButtonListener(){
     }
 
     //CREATE A NEW VEHICLE AND ADD IT TO THE DICTIONARY TO KEEP TRACK OF THEM BY NAME
-    robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,0);
+    robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,180);
     game.add.existing(robotDict[robotName]);
 
 }
