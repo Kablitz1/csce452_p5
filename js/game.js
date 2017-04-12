@@ -33,14 +33,14 @@ BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
     //SET THE K_MATRIX
     this.K_matrix = K_matrix;
     //THIS WILL ATTACH A ROBOT USING THE TOP LEFT OF THE IMAGE
-    this.PosX = initialLocationArray[0];
-    this.PosY = initialLocationArray[1];
+    this.x = initialLocationArray[0];
+    this.y = initialLocationArray[1];
 
     //LOCATION OF SENSORS
-    this.L_SensorLocationX = this.PosX+23;
-    this.L_SensorLocationY = this.PosY+7;
-    this.R_SensorLocationX = this.PosX+58;
-    this.R_SensorLocationY = this.PosY+6;
+    this.L_SensorLocationX = this.x+23;
+    this.L_SensorLocationY = this.y+7;
+    this.R_SensorLocationX = this.x+58;
+    this.R_SensorLocationY = this.y+6;
 
     //ROTATION DATA
     //ANGLE IS INHERITED FROM SPRITE AND IS WHAT ROTATES THE SPRITE
@@ -62,9 +62,20 @@ BraitenbergRobot.prototype = Object.create(Phaser.Sprite.prototype);
 BraitenbergRobot.prototype.constructor = BraitenbergRobot;
 BraitenbergRobot.prototype.update = function() {
 
+    //CALCULATE NEW XY POSITION BASED ON VELOCITY OF THE WHEELS
+    function calculateNewXYAndAngle(velocityLeftWheel, velocityRightWheel) {
+        var wheelVelocityDifference = math.abs(velocityLeftWheel - velocityRightWheel);
+
+        var newX = 0;
+        var newY = velocityLeftWheel;
+        var newAngle = math.atan(80/wheelVelocityDifference);
+
+        return [newX, newY, newAngle];
+    }
     //  Automatically called by World.update
     //ALWAYS MOVE THE ROBOT
     //moves robot according to where each lightPos is
+
     function moveRobot(lightPosAr,thisRobot){
         var tempL_SensorIntensity = 0;
         //for each lightPos in array, sensor 1
@@ -96,7 +107,11 @@ BraitenbergRobot.prototype.update = function() {
         var velocityRightWheel = thisRobot.w2Speed*35;
 
         //THEN USING THAT SPEED FIND OUT HOW FAR A ROBOT WOULD GO PER SECOND
-
+        //AND CHANGE THE X AND Y POS ACCORDINGLY
+        var newXYpositionAndAngle = calculateNewXYAndAngle(velocityLeftWheel,velocityRightWheel);
+        thisRobot.x = thisRobot.x + newXYpositionAndAngle[0];
+        thisRobot.y = thisRobot.y + newXYpositionAndAngle[1];
+        thisRobot.angle = newXYpositionAndAngle[2];
 
 
         //UPDATE THE LOCATION OF THE SENSORS WITH RESPECT TO THE ROTATION POINT.
@@ -119,11 +134,11 @@ BraitenbergRobot.prototype.update = function() {
         var R_SensorDefaultLocationY = 6;
 
 
-
-        thisRobot.L_SensorLocationX = thisRobot.PosX + Math.round(L_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-L_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
-        thisRobot.L_SensorLocationY = thisRobot.PosY+ Math.round(L_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+L_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
-        thisRobot.R_SensorLocationX = thisRobot.PosX+ Math.round(R_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-R_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
-        thisRobot.R_SensorLocationY = thisRobot.PosY+ Math.round(R_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+R_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
+        //SET THE NEW LOCATION BASED ON CURRENT POSITION AND ROTATION
+        thisRobot.L_SensorLocationX = thisRobot.x + Math.round(L_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-L_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
+        thisRobot.L_SensorLocationY = thisRobot.y+ Math.round(L_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+L_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
+        thisRobot.R_SensorLocationX = thisRobot.x+ Math.round(R_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-R_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
+        thisRobot.R_SensorLocationY = thisRobot.y+ Math.round(R_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+R_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
     }
 
     //based on light position, own sensor position will give intensity of light
