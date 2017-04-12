@@ -52,7 +52,7 @@ BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
     this.R_SensorIntensity = 0;
 
     //wheel info
-    this.wheelSize = [70,70]; // WE GET TO SET OUR OWN WHEEL SIZE
+    this.wheelSize = [70,70]; // WE GET TO SET OUR OWN WHEEL SIZE WHICH BASED ON IMAGE IS 70 PX
     this.w1Speed = 0; //left wheel
     this.w2Speed = 0;
 };
@@ -95,6 +95,33 @@ BraitenbergRobot.prototype.update = function() {
         var velocityLeftWheel = thisRobot.w1Speed*35; //radius of wheel sprite
         var velocityRightWheel = thisRobot.w2Speed*35;
 
+        //THEN USING THAT SPEED FIND OUT HOW FAR A ROBOT WOULD GO PER SECOND
+        //UPDATE THE LOCATION OF THE SENSORS WITH RESPECT TO THE ANCHOR POINT.
+        //THE SIGNS CHANGE DEPENDING ON THE ANGLE OF THE ROBOT.
+        updateSensorLocation(thisRobot);
+    }
+
+    function degreesToRads(degrees){
+        return (degrees*math.PI)/180;
+    }
+    function radsToDegrees(radians){
+        return radians*180/math.PI;
+    }
+
+    //I USED THE ROTATION FORMULA FOR THIS VALUE. THE SIGNS MAY NEED TO BE FLIPPED
+    function updateSensorLocation(thisRobot){
+        // ORIGINAL POSITION IT WOULD BE IF THE ANGLE WAS 0
+        var L_SensorDefaultLocationX =  thisRobot.PosX+23;
+        var L_SensorDefaultLocationY = thisRobot.PosY+6;
+        var R_SensorDefaultLocationX = thisRobot.PosX+58;
+        var R_SensorDefaultLocationY = thisRobot.PosY+6;
+
+
+
+        thisRobot.L_SensorLocationX = L_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-L_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle));
+        thisRobot.L_SensorLocationY = L_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+L_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle));
+        thisRobot.R_SensorLocationX = R_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-R_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle));
+        thisRobot.R_SensorLocationY = R_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+R_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle));
     }
 
     //based on light position, own sensor position will give intensity of light
@@ -149,11 +176,6 @@ function create() {
     addRobotButton= game.add.button(game.width - 100,70,'addRobot',addRobotButtonListener,this,0,0,1,0);
     removeRobotButton= game.add.button(game.width - 100,130,'removeRobot',removeRobotButtonListener,this,0,0,1,0);
 
-    //CREATING ROBOT GROUP
-    robotImageArray = game.add.group();
-    robotImageArray.setAll('checkWorldBounds', true);
-    robotImageArray.setAll('outOfBoundsKill', true); //WE MAY WANT TO REMOVE THIS
-
     //CREATING LIGHT SOURCES GROUP
     lightSources = game.add.group();
     lightSources.setAll('checkWorldBounds', true);
@@ -195,8 +217,6 @@ function render() {
 function addLightSourceButtonListener(){
     //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
     addLightSourceBool = true;
-    addRobotBool = false;
-    removeRobotBool = false;
 }
 
 function addLightSource(game){
@@ -253,7 +273,7 @@ function addRobotButtonListener(){
 
     //USER PROMPTS TO GET INFORMATION FROM USER
     //KMATRIX
-    var KmapString = prompt("Enter K Map"); //k11,k12,k21,k22 <- this format
+    var KmapString = prompt("Enter K Matrix"); //k11,k12,k21,k22 <- this format
     //PARSE THAT STRING
     var K_matrix = parseKmapString(KmapString);
     //IF THEY DID IT RIGHT
@@ -281,8 +301,8 @@ function addRobotButtonListener(){
     }
 
     //CREATE A NEW VEHICLE AND ADD IT TO THE DICTIONARY TO KEEP TRACK OF THEM BY NAME
-    robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,90);
-    var sprite = game.add.existing(robotDict[robotName]);
+    robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,0);
+    game.add.existing(robotDict[robotName]);
 
 }
 
