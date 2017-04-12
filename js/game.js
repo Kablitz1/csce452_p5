@@ -52,7 +52,7 @@ BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
     this.R_SensorIntensity = 0;
 
     //wheel info
-    this.wheelSize = [20,20]; // WE GET TO SET OUR OWN WHEEL SIZE
+    this.wheelSize = [70,70]; // WE GET TO SET OUR OWN WHEEL SIZE
     this.w1Speed = 0; //left wheel
     this.w2Speed = 0;
 };
@@ -220,7 +220,7 @@ function parseKmapString(KmapString) {
     //TURN FROM STRING TO INT
     for(i = 0; i < tempArray.length; i++)
     {
-        tempArray[i] = parseInt(tempArray[i]);
+        tempArray[i] = parseFloat(tempArray[i]);
     }
 
     //GET INTO 2X2 ARRAY AND RETURN
