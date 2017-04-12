@@ -20,31 +20,44 @@ var removeRobotBool;
 //-----------------------------------------------------------------------------
 //Class Definitions
 //-----------------------------------------------------------------------------
-//Braitenburg Vehicle Class
+//Braitenberg Vehicle Class
 //-----------------------------------------------------------------------------
 
 
 //WORKS LIKE A CLASS ODDLY ENOUGH
 BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
 
+    //THE ANCHOR IS SET TO 0,0 BY DEFAULT WHICH IS THE TOP LEFT OF AN IMAGE
+    //WE WILL MAKE ALL MEASUREMENTS FROM THERE
+    //SENSORL
+    
     Phaser.Sprite.call(this, game, initialLocationArray[0], initialLocationArray[1], 'robot'); //extends Sprite
-    this.K_matrix = K_matrix;
-    this.PosX = initialLocationArray[0]; //int
-    this.PosY = initialLocationArray[1]; //int
-    this.orient = initialOrientation;//degrees
 
-    //position of sensors
-    //this.sens1X = //NOTE:: we have to initialize this
-    //this.sens1Y = //NOTE:: we have to initialize this
+    //SET THE K_MATRIX
+    this.K_matrix = K_matrix;
+    //THIS WILL ATTACH A ROBOT USING THE TOP LEFT OF THE IMAGE
+    this.PosX = initialLocationArray[0];
+    this.PosY = initialLocationArray[1];
+
+    //LOCATION OF SENSORS
+    this.L_SensorLocationX = this.PosX+23;
+    this.L_SensorLocationY = this.PosY+7;
+    this.R_SensorLocationX = this.PosX+58;
+    this.R_SensorLocationY = this.PosY+6;
+
+    //ROTATION DATA
+    //ANGLE IS INHERITED FROM SPRITE AND IS WHAT ROTATES THE SPRITE
+    this.angle = initialOrientation;//degrees
+    this.rotateSpeed = 1;
 
     //intensity of sensors
-    this.sens1S = 0;
-    this.sens2S = 0;
+    this.L_SensorIntensity = 0;
+    this.R_SensorIntensity = 0;
 
     //wheel info
     this.wheelSize = [20,20]; // WE GET TO SET OUR OWN WHEEL SIZE
     this.w1Speed = 0; //left wheel
-    this.w2Speed = 1;
+    this.w2Speed = 0;
     //moves robot according to where each lightPos is
     function moveRobot(lightPosAr){
         //for each lightPos in array, sensor 1
@@ -53,14 +66,14 @@ BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
             this.calcIntensity(sOut1, lightPosAr[i].PosX, lightPosAr[i].PosY, this.sens1X, this.sens1Y);
         }
 
-        this.sens2S = sOut2;
+        this.R_SensorIntensity = sOut2;
 
         //for each lightPos in array, sensor 2
         var sOut2 = 0;
         for(i = 0; i < lightPosAr.length; i++){
             calcIntensity(sOut2, lightPosAr[i].PosX, lightPosAr[i].PosY, this.sens2X, this.sens2Y);
         }
-        this.sens2S = sOut2;
+        this.R_SensorIntensity = sOut2;
 
         //calculate wheel speed
         calcWheelSpeed();
@@ -89,15 +102,20 @@ BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
     //Based on sensor output and matrix K, determine speed of the wheels
     function calcWheelSpeed(){
         //Each wheel speed is the dot product of its corresponding row of K and the array of the two sensors
-        this.w1Speed = math.dot([this.matK.get(0,0), this.matK.get(0,1)], [this.sens1S, this.sens2S]);
-        this.w2Speed = math.dot([this.matK.get(1,0), this.matK.get(1,1)], [this.sens1S, this.sens2S]);
+        this.w1Speed = math.dot([this.matK.get(0,0), this.matK.get(0,1)], [this.sens1S, this.R_SensorIntensity]);
+        this.w2Speed = math.dot([this.matK.get(1,0), this.matK.get(1,1)], [this.sens1S, this.R_SensorIntensity]);
     }
 };
 
 //MAKES THE ROBOT BECOME AN OBJECT
 BraitenbergRobot.prototype = Object.create(Phaser.Sprite.prototype);
 BraitenbergRobot.prototype.constructor = BraitenbergRobot;
+BraitenbergRobot.prototype.update = function() {
 
+    //  Automatically called by World.update
+
+
+};
 
 function addLightSource(game){
     //spawn light source at click location, and add to array
@@ -283,7 +301,7 @@ function addRobotButtonListener(){
     }
 
     //CREATE A NEW VEHICLE AND ADD IT TO THE DICTIONARY TO KEEP TRACK OF THEM BY NAME
-    robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,0);
+    robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,90);
     var sprite = game.add.existing(robotDict[robotName]);
 
 }
