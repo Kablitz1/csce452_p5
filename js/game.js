@@ -40,14 +40,14 @@ var BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientati
     //SET THE K_MATRIX
     this.K_matrix = K_matrix;
     //THIS WILL ATTACH A ROBOT USING THE TOP LEFT OF THE IMAGE
-    this.PosX = initialLocationArray[0];
-    this.PosY = initialLocationArray[1];
+    this.x = initialLocationArray[0];
+    this.y = initialLocationArray[1];
 
     //LOCATION OF SENSORS
-    this.L_SensorLocationX = this.PosX+23;
-    this.L_SensorLocationY = this.PosY+7;
-    this.R_SensorLocationX = this.PosX+58;
-    this.R_SensorLocationY = this.PosY+6;
+    this.L_SensorLocationX = this.x+23;
+    this.L_SensorLocationY = this.y+7;
+    this.R_SensorLocationX = this.x+58;
+    this.R_SensorLocationY = this.y+6;
 
     //ROTATION DATA
     //ANGLE IS INHERITED FROM SPRITE AND IS WHAT ROTATES THE SPRITE
@@ -62,7 +62,7 @@ var BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientati
     this.R_SensorIntensity = 0;
 
     //wheel info
-    this.wheelSize = [70,70]; // WE GET TO SET OUR OWN WHEEL SIZE
+    this.wheelSize = [70,70]; // WE GET TO SET OUR OWN WHEEL SIZE WHICH BASED ON IMAGE IS 70 PX
     this.w1Speed = 0; //left wheel
     this.w2Speed = 0;
 };
@@ -72,9 +72,20 @@ BraitenbergRobot.prototype = Object.create(Phaser.Sprite.prototype);
 BraitenbergRobot.prototype.constructor = BraitenbergRobot;
 BraitenbergRobot.prototype.update = function() {
 
+    //CALCULATE NEW XY POSITION BASED ON VELOCITY OF THE WHEELS
+    function calculateNewXYAndAngle(velocityLeftWheel, velocityRightWheel) {
+        var wheelVelocityDifference = math.abs(velocityLeftWheel - velocityRightWheel);
+
+        var newX = 0;
+        var newY = velocityLeftWheel;
+        var newAngle = math.atan(80/wheelVelocityDifference);
+
+        return [newX, newY, newAngle];
+    }
     //  Automatically called by World.update
     //ALWAYS MOVE THE ROBOT
     //moves robot according to where each lightPos is
+
     function moveRobot(lightPosAr,thisRobot){
         var tempL_SensorIntensity = 0;
         //for each lightPos in array, sensor 1
@@ -102,11 +113,13 @@ BraitenbergRobot.prototype.update = function() {
 
         //calculate wheel speed
         calcWheelSpeed(thisRobot);
+        
+        var SPEED_NERF = 0.01;
 
         //based on wheel speeds, move the robot
         //first find linear velocity (px/s) of each wheel
-        var velocityLeftWheel = thisRobot.w1Speed*35; //radius of wheel sprite
-        var velocityRightWheel = thisRobot.w2Speed*35;
+        var velocityLeftWheel = thisRobot.w1Speed* SPEED_NERF; //radius of wheel sprite
+        var velocityRightWheel = thisRobot.w2Speed*35 * SPEED_NERF;
         
         // Width of the robot
         var axel = 80;
@@ -115,17 +128,13 @@ BraitenbergRobot.prototype.update = function() {
         
         //console.log('Angle of Robot: ' + robot_angle);
         
-        thisRobot.rotation = robot_angle;// - 90;
-        
-        console.log('DEBUG rotation value: ' + robot_angle);
+        thisRobot.rotation = thisRobot.rotation + robot_angle;// - 90;
         
         var wheel_average = ( velocityLeftWheel + velocityRightWheel ) / 2;
         
+        thisRobot.x = thisRobot.x + math.cos(robot_angle) * wheel_average;
+        thisRobot.y = thisRobot.y + math.sin(robot_angle) * wheel_average;
         
-        //thisRobot.x += math.cos( robot_angle ) * wheel_average;
-        //thisRobot.y += math.sin( robot_angle ) * wheel_average;
-
-       // console.log('New Calculated position: (' + thisRobot.x, + ',' + thisRobot.y, ')');
     }
 
     //based on light position, own sensor position will give intensity of light
@@ -182,11 +191,6 @@ function create() {
     addRobotButton= game.add.button(game.width - 100,70,'addRobot',addRobotButtonListener,this,0,0,1,0);
     removeRobotButton= game.add.button(game.width - 100,130,'removeRobot',removeRobotButtonListener,this,0,0,1,0);
 
-    //CREATING ROBOT GROUP
-    robotImageArray = game.add.group();
-    robotImageArray.setAll('checkWorldBounds', true);
-    robotImageArray.setAll('outOfBoundsKill', true); //WE MAY WANT TO REMOVE THIS
-
     //CREATING LIGHT SOURCES GROUP
     lightSources = game.add.group();
     lightSources.setAll('checkWorldBounds', true);
@@ -228,8 +232,6 @@ function render() {
 function addLightSourceButtonListener(){
     //JUST SET THE LIGHT TOGGLE TO TRUE AND OTHERS FALSE
     addLightSourceBool = true;
-    addRobotBool = false;
-    removeRobotBool = false;
 }
 
 function addLightSource(game){
@@ -291,7 +293,7 @@ function addRobotButtonListener(){
     
     if(DEBUG_MODE){
         robotName = 'Robby';
-        K_matrix = [ [1,0], [0,1] ];
+        K_matrix = [ [0,1], [1,0] ];
         locationArray = [500,500];
     } else{
         
