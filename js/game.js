@@ -43,8 +43,12 @@ BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
     //THIS WILL ATTACH A ROBOT USING THE TOP LEFT OF THE IMAGE
     this.x = initialLocationArray[0];
     this.y = initialLocationArray[1];
-    this.body.angularVelocity= 0;
-    this.body.velocity = 50;
+    
+    this.body.velocity.x = 0;
+    this.body.velocity.y = 0;
+    this.body.angularVelocity = 0;
+   // this.body.angularVelocity= 0;
+   // this.body.velocity = 50;
 
     //LOCATION OF SENSORS
     this.L_SensorLocationX = this.x+23;
@@ -121,12 +125,14 @@ BraitenbergRobot.prototype.update = function() {
 
         //based on wheel speeds, move the robot
         //first find linear velocity (px/s) of each wheel
-        var velocityLeftWheel = thisRobot.w1Speed*35; //radius of wheel sprite
-        var velocityRightWheel = thisRobot.w2Speed*35;
+        var velocityLeftWheel = thisRobot.w1Speed*35*SPEED_NERF; //radius of wheel sprite
+        var velocityRightWheel = thisRobot.w2Speed*35*SPEED_NERF;
 
         //THEN USING THAT SPEED FIND OUT HOW FAR A ROBOT WOULD GO PER SECOND
         //AND CHANGE THE X AND Y POS ACCORDINGLY
         var newVelocityandAngle = calculateNewXYAndAngle(velocityLeftWheel,velocityRightWheel);
+        thisRobot.body.angularVelocity = newVelocityandAngle[1];
+        game.physics.arcade.velocityFromAngle(thisRobot.angle, newVelocityandAngle[0], thisRobot.body.velocity);
         //thisRobot.body.velocity = newVelocityandAngle[0];
         //console.log("Velocity" + thisRobot.velocity);
         //thisRobot.body.angularVelocity = (-newVelocityandAngle[1]);
@@ -158,8 +164,8 @@ BraitenbergRobot.prototype.update = function() {
         thisRobot.L_SensorLocationY = thisRobot.y+ Math.round(L_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+L_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
         thisRobot.R_SensorLocationX = thisRobot.x+ Math.round(R_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-R_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
         thisRobot.R_SensorLocationY = thisRobot.y+ Math.round(R_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+R_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
-        var velocityLeftWheel = thisRobot.w1Speed* SPEED_NERF; //radius of wheel sprite
-        var velocityRightWheel = thisRobot.w2Speed*35 * SPEED_NERF;
+        var velocityLeftWheel = thisRobot.w1Speed*35; //radius of wheel sprite
+        var velocityRightWheel = thisRobot.w2Speed*35;
 
         // Width of the robot
         var axel = 80;
@@ -333,7 +339,7 @@ function addRobotButtonListener(){
 
     if(DEBUG_MODE){
         robotName = 'Robby';
-        K_matrix = [ [0,1], [1,0] ];
+        K_matrix = [ [0.1,0], [0,0.1] ];
         locationArray = [500,500];
     } else{
 
