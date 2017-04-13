@@ -2,6 +2,11 @@
 //Global Variables
 //-----------------------------------------------------------------------------
 
+var DEBUG_MODE = true;
+var DEBUG_ROTATION = 0;
+
+//-----------------------------------------------------------------------------
+
 //light source handling
 var lightSources; //group containing light sprites
 var robotDict = {}; //KEY IS NAME, VALUE IS OBJECT WHICH EXTENDS SPRITE
@@ -13,6 +18,8 @@ var removeRobotButton;
 
 //BOOL BUTTONS
 var addLightSourceBool; //says whether clicking will place a light source
+var addRobotBool;
+var removeRobotBool;
 
 //-----------------------------------------------------------------------------
 //Class Definitions
@@ -22,7 +29,7 @@ var addLightSourceBool; //says whether clicking will place a light source
 
 
 //WORKS LIKE A CLASS ODDLY ENOUGH
-BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
+var BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
 
     //THE ANCHOR IS SET TO 0,0 BY DEFAULT WHICH IS THE TOP LEFT OF AN IMAGE
     //WE WILL MAKE ALL MEASUREMENTS FROM THERE
@@ -46,6 +53,9 @@ BraitenbergRobot = function(K_matrix, initialLocationArray, initialOrientation){
     //ANGLE IS INHERITED FROM SPRITE AND IS WHAT ROTATES THE SPRITE
     this.angle = initialOrientation;//degrees
     this.rotateSpeed = 1;
+    
+    this.anchor.x = 0.5;
+    this.anchor.y = 0.5;
 
     //intensity of sensors
     this.L_SensorIntensity = 0;
@@ -68,12 +78,14 @@ BraitenbergRobot.prototype.update = function() {
     function moveRobot(lightPosAr,thisRobot){
         var tempL_SensorIntensity = 0;
         //for each lightPos in array, sensor 1
+        var i;
         for(i = 0; i < lightPosAr.children.length; i++){
             tempL_SensorIntensity += calcIntensity(lightPosAr.children[i].x, lightPosAr.children[i].y, thisRobot.L_SensorLocationX, thisRobot.L_SensorLocationY);
         }
 
         if(tempL_SensorIntensity > 100)
             tempL_SensorIntensity = 100;
+            
         thisRobot.L_SensorIntensity = tempL_SensorIntensity;
 
         //for each lightPos in array, sensor 2
@@ -85,6 +97,7 @@ BraitenbergRobot.prototype.update = function() {
 
         if(tempR_SensorIntensity > 100)
             tempR_SensorIntensity = 100;
+            
         thisRobot.R_SensorIntensity = tempR_SensorIntensity;
 
         //calculate wheel speed
@@ -94,7 +107,25 @@ BraitenbergRobot.prototype.update = function() {
         //first find linear velocity (px/s) of each wheel
         var velocityLeftWheel = thisRobot.w1Speed*35; //radius of wheel sprite
         var velocityRightWheel = thisRobot.w2Speed*35;
+        
+        // Width of the robot
+        var axel = 80;
+        
+        var robot_angle = (velocityRightWheel - velocityLeftWheel) / axel;
+        
+        //console.log('Angle of Robot: ' + robot_angle);
+        
+        thisRobot.rotation = robot_angle;// - 90;
+        
+        console.log('DEBUG rotation value: ' + robot_angle);
+        
+        var wheel_average = ( velocityLeftWheel + velocityRightWheel ) / 2;
+        
+        
+        //thisRobot.x += math.cos( robot_angle ) * wheel_average;
+        //thisRobot.y += math.sin( robot_angle ) * wheel_average;
 
+       // console.log('New Calculated position: (' + thisRobot.x, + ',' + thisRobot.y, ')');
     }
 
     //based on light position, own sensor position will give intensity of light
@@ -111,8 +142,10 @@ BraitenbergRobot.prototype.update = function() {
     //Based on sensor output and matrix K, determine speed of the wheels
     function calcWheelSpeed(thisRobot){
         //Each wheel speed is the dot product of its corresponding row of K and the array of the two sensors
+        
         thisRobot.w1Speed = math.dot([thisRobot.K_matrix[0][0], thisRobot.K_matrix[0][1]], [thisRobot.L_SensorIntensity, thisRobot.R_SensorIntensity]);
         thisRobot.w2Speed = math.dot([thisRobot.K_matrix[1][0], thisRobot.K_matrix[1][1]], [thisRobot.L_SensorIntensity, thisRobot.R_SensorIntensity]);
+        
     }
     moveRobot(lightSources,this);
 };
@@ -218,6 +251,7 @@ function parseKmapString(KmapString) {
         return 0;
     }
     //TURN FROM STRING TO INT
+    var i;
     for(i = 0; i < tempArray.length; i++)
     {
         tempArray[i] = parseFloat(tempArray[i]);
@@ -237,6 +271,7 @@ function parseNewRobotLocation(newRobotLocation) {
         return 0;
     }
     //TURN STRING TO INT
+    var i;
     for(i = 0; i < array.length; i++)
     {
         array[i] = parseInt(array[i]);
@@ -253,37 +288,43 @@ function addRobotButtonListener(){
 
     //USER PROMPTS TO GET INFORMATION FROM USER
     //KMATRIX
-    var KmapString = prompt("Enter K Map"); //k11,k12,k21,k22 <- this format
-    //PARSE THAT STRING
-    var K_matrix = parseKmapString(KmapString);
-    //IF THEY DID IT RIGHT
-    if(accurateAddRobotInformationBool) {
-        //GET LOCATION
-        var newRobotLocation = prompt("Enter Desired Location (x,y)"); //x,y <- this format
-        var locationArray = parseNewRobotLocation(newRobotLocation);
+    
+    if(DEBUG_MODE){
+        robotName = 'Robby';
+        K_matrix = [ [1,0], [0,1] ];
+        locationArray = [500,500];
+    } else{
+        
+         var KmapString = prompt("Enter K Map"); //k11,k12,k21,k22 <- this format
+        //PARSE THAT STRING
+        var K_matrix = parseKmapString(KmapString);
+        //IF THEY DID IT RIGHT
+        if(accurateAddRobotInformationBool) {
+            //GET LOCATION
+            var newRobotLocation = prompt("Enter Desired Location (x,y)"); //x,y <- this format
+            var locationArray = parseNewRobotLocation(newRobotLocation);
+        }
+        else{
+            //tell the user it got it wrong
+            window.alert("Bad Information!");
+            accurateAddRobotInformationBool = true;
+            return 0;
+        }
+        //IF THEY GET THAT RIGHT TOO
+        if(accurateAddRobotInformationBool)
+            //GET THE NAME
+            var robotName = prompt("Enter Robot Name"); //FOR REMOVING
+        else{
+            //tell the user it got it wrong
+            window.alert("Bad Information!");
+            accurateAddRobotInformationBool = true;
+            return 0;
+        }
     }
-    else
-    {
-        //tell the user it got it wrong
-        window.alert("Bad Information!");
-        accurateAddRobotInformationBool = true;
-        return 0;
-    }
-    //IF THEY GET THAT RIGHT TOO
-    if(accurateAddRobotInformationBool)
-        //GET THE NAME
-        var robotName = prompt("Enter Robot Name"); //FOR REMOVING
-    else{
-        //tell the user it got it wrong
-        window.alert("Bad Information!");
-        accurateAddRobotInformationBool = true;
-        return 0;
-    }
-
+    
     //CREATE A NEW VEHICLE AND ADD IT TO THE DICTIONARY TO KEEP TRACK OF THEM BY NAME
     robotDict[robotName] = new BraitenbergRobot(K_matrix,locationArray,90);
     var sprite = game.add.existing(robotDict[robotName]);
-
 }
 
 function removeRobotButtonListener(){
