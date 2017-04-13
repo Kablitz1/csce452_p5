@@ -2,7 +2,7 @@
 //Global Variables
 //-----------------------------------------------------------------------------
 
-var DEBUG_MODE = false;
+var DEBUG_MODE = true;
 var DEBUG_ROTATION = 0;
 
 //-----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ BraitenbergRobot.prototype.update = function() {
         //calculate wheel speed
         calcWheelSpeed(thisRobot);
 
-        var SPEED_NERF = 0.5;
+        var SPEED_NERF = 1;
 
         //based on wheel speeds, move the robot
         //first find linear velocity (px/s) of each wheel
@@ -128,6 +128,8 @@ BraitenbergRobot.prototype.update = function() {
         //AND CHANGE THE X AND Y POS ACCORDINGLY
         var newVelocityandAngle = calculateNewXYAndAngle(velocityLeftWheel,velocityRightWheel);
         thisRobot.body.angularVelocity = newVelocityandAngle[1]*-1;
+        if (newVelocityandAngle[0] < 20)
+            newVelocityandAngle[0] = 20;
         game.physics.arcade.velocityFromAngle(thisRobot.angle, newVelocityandAngle[0], thisRobot.body.velocity);
 
         var tempX = thisRobot.body.velocity.x;
@@ -176,7 +178,7 @@ BraitenbergRobot.prototype.update = function() {
         var distance = math.sqrt(X*X + Y*Y);
         if(distance < 1)
             distance = 1;
-        return Math.round(100/distance);
+        return 100/distance;
     }
 
     //Based on sensor output and matrix K, determine speed of the wheels
@@ -220,6 +222,7 @@ function preload() {
 function create() {
 
     //SET BACKGROUND COLOR
+    game.world.setBounds(0,0,1280,720);
     game.stage.backgroundColor = "#36b3de"; // VERY RELAXING :)
     game.physics.startSystem(Phaser.Physics.ARCADE);
     //ADDING BUTTONS
@@ -253,7 +256,9 @@ function update() {
 
         frameDelay = 0;
     }
-
+    for (var key in robotDict) {
+        game.world.wrap(robotDict[key],0,true);
+    }
 }
 
 //Render
@@ -339,7 +344,7 @@ function addRobotButtonListener(){
 
     if(DEBUG_MODE){
         robotName = 'Robby';
-        K_matrix = [ [0,1], [1,0] ];
+        K_matrix = [ [5,0], [0,5] ];
         locationArray = [500,500];
     } else{
 
