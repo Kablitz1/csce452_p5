@@ -2,7 +2,7 @@
 //Global Variables
 //-----------------------------------------------------------------------------
 
-var DEBUG_MODE = true;
+var DEBUG_MODE = false;
 var DEBUG_ROTATION = 0;
 
 //-----------------------------------------------------------------------------
@@ -18,9 +18,6 @@ var removeRobotButton;
 
 //BOOL BUTTONS
 var addLightSourceBool; //says whether clicking will place a light source
-var addRobotBool;
-var removeRobotBool;
-
 //-----------------------------------------------------------------------------
 //Class Definitions
 //-----------------------------------------------------------------------------
@@ -169,23 +166,6 @@ BraitenbergRobot.prototype.update = function() {
         thisRobot.R_SensorLocationX = thisRobot.x+ Math.round(R_SensorDefaultLocationX*math.cos(degreesToRads(thisRobot.angle))-R_SensorDefaultLocationY*math.sin(degreesToRads(thisRobot.angle)));
         thisRobot.R_SensorLocationY = thisRobot.y+ Math.round(R_SensorDefaultLocationX*math.sin(degreesToRads(thisRobot.angle))+R_SensorDefaultLocationY*math.cos(degreesToRads(thisRobot.angle)));
         graphic2.drawCircle(thisRobot.R_SensorLocationX,thisRobot.R_SensorLocationY,5);
-        // var velocityLeftWheel = thisRobot.w1Speed*35; //radius of wheel sprite
-        // var velocityRightWheel = thisRobot.w2Speed*35;
-        //
-        // // Width of the robot
-        // var axel = 80;
-        //
-        // var robot_angle = (velocityRightWheel - velocityLeftWheel) / axel;
-        //
-        // //console.log('Angle of Robot: ' + robot_angle);
-        //
-        // thisRobot.rotation = thisRobot.rotation + robot_angle;// - 90;
-        //
-        // var wheel_average = ( velocityLeftWheel + velocityRightWheel ) / 2;
-        //
-        // thisRobot.x = thisRobot.x + math.cos(robot_angle) * wheel_average;
-        // thisRobot.y = thisRobot.y + math.sin(robot_angle) * wheel_average;
-
     }
 
     //based on light position, own sensor position will give intensity of light
@@ -266,6 +246,7 @@ function update() {
         if(addLightSourceBool){
             if(game.input.activePointer.isDown && game.input.mousePointer.x < 1175){
                 addLightSource(game);
+                addLightSourceBool = false;
                 console.log("Num Lights: "+lightSources.length);
             }
         }
@@ -292,9 +273,18 @@ function addLightSourceButtonListener(){
 
 function addLightSource(game){
     //spawn light source at click location, and add to array
-    lightSources.add(game.add.sprite(game.input.x, game.input.y, 'sun'));
-}
+    var sprite = lightSources.add(game.add.sprite(game.input.x, game.input.y, 'sun'));
+    sprite.inputEnabled = true;
 
+    sprite.input.useHandCursor = true;
+
+    sprite.events.onInputDown.add(destroySprite, this);
+}
+function destroySprite (sprite) {
+
+    sprite.destroy();
+
+}
 //NEED TO CHECK FOR VALID INPUT FROM PROMPTS
 var accurateAddRobotInformationBool;
 
