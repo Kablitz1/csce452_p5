@@ -21,20 +21,24 @@ var startY;
 var finishX;
 var finishY;
 
+var startCount= 0;
+var finishCount= 0;
+
+
 
 //-----------------------------------------------------------------------------
 //Phaser Game Functionality
 //-----------------------------------------------------------------------------
 
 //mapping phaser game to var
-var game = new Phaser.Game(500, 500, Phaser.AUTO, '', { preload: preload, create: create, update: update, render:render });
+var game = new Phaser.Game(500, 550, Phaser.AUTO, '', { preload: preload, create: create, update: update, render:render });
 
 //Preload
 //-----------------------------------------------------------------------------
 //preload assets needed for game
 function preload() {
 
-    game.load.spritesheet('background', 'assets/background.png',500,500);
+    game.load.spritesheet('background', 'assets/background.png',500,550);
 
     game.load.spritesheet('rectangle1', 'assets/rectangle1.png',200,200);
     game.load.spritesheet('rectangle2', 'assets/rectangle2.png',150,150);
@@ -47,6 +51,7 @@ function preload() {
 
     game.load.spritesheet('start_button', 'assets/start_button.png',100,50);
     game.load.spritesheet('finish_button', 'assets/finish_button.png',100,50);
+    game.load.spritesheet('path_button', 'assets/path_button.png',100,50);
 
 }
 
@@ -76,8 +81,9 @@ function create() {
 
     //-------------------------------------------------------
 
-    game.add.button(0, 450, 'start_button', addStart, this, 0, 0, 1, 0);
-    game.add.button(120, 450, 'finish_button', addFinish, this, 0, 0, 1, 0);
+    game.add.button(0, 500, 'start_button', addStart, this, 0, 0, 1, 0);
+    game.add.button(120, 500, 'finish_button', addFinish, this, 0, 0, 1, 0);
+    game.add.button(240, 500, 'path_button', addPath, this, 0,0,1,0);
 }
 
 //Update
@@ -90,7 +96,7 @@ function update() {
 
     if(frameDelay > 6) {
         if(placeStart_bool){
-            if(game.input.activePointer.isDown && game.input.mousePointer.x < 500){
+            if(game.input.activePointer.isDown && game.input.mousePointer.y < 500){
                 // TODO add checking to not place start on a rectangle
                 if( confirmPlacement() )
                     addStartSprite(game);
@@ -100,7 +106,7 @@ function update() {
         }
 
         if(placeFinish_bool){
-            if(game.input.activePointer.isDown && game.input.mousePointer.x < 500){
+            if(game.input.activePointer.isDown && game.input.mousePointer.y < 500){
                 // TODO add checking to not place finish on a rectangle
                 if( confirmPlacement() )
                     addFinishSprite(game);
@@ -133,12 +139,19 @@ function addStart(){
 function addFinish(){
     placeFinish_bool = true;
 }
+function addPath() {
+    calculatePath();
+}
+
 
 //-----------------------------------------------------------------------------
 // Supporting Functions
 //-----------------------------------------------------------------------------
 
 function addStartSprite(game){
+    if (startCount > 0)
+        return null;
+    startCount+=1;
     //spawn light source at click location, and add to array
     start = game.add.sprite(game.input.x, game.input.y, 'start');
 
@@ -148,10 +161,13 @@ function addStartSprite(game){
     startX = game.input.x;
     startY = game.input.y;
 
-    start.events.onInputDown.add(destroySprite, this);
+    start.events.onInputDown.add(destroyStartSprite, this);
 }
 
 function addFinishSprite(game){
+    if (finishCount > 0)
+        return null;
+    finishCount+=1;
     //spawn light source at click location, and add to array
     finish = game.add.sprite(game.input.x, game.input.y, 'finish');
 
@@ -161,10 +177,16 @@ function addFinishSprite(game){
     finishX = game.input.x;
     finishY = game.input.y;
 
-    finish.events.onInputDown.add(destroySprite, this);
+    finish.events.onInputDown.add(destroyFinishSprite, this);
+}
+function destroyStartSprite (sprite) {
+    startCount-=1;
+    sprite.destroy();
 }
 
-function destroySprite (sprite) {
+
+function destroyFinishSprite (sprite) {
+    finishCount-=1;
     sprite.destroy();
 }
 
@@ -172,6 +194,7 @@ function confirmPlacement(){
     return true;
 }
 
+//CALCULATES PATH BETWEEN POINTS
 function calculatePath(){
 
 }
