@@ -98,7 +98,7 @@ function update() {
         if(placeStart_bool){
             if(game.input.activePointer.isDown && game.input.mousePointer.y < 500){
                 // TODO add checking to not place start on a rectangle
-                if( confirmPlacement() )
+                if( confirmPlacement(game.input.mousePointer.x ,game.input.mousePointer.y) )
                     addStartSprite(game);
 
                 placeStart_bool = false;
@@ -108,12 +108,10 @@ function update() {
         if(placeFinish_bool){
             if(game.input.activePointer.isDown && game.input.mousePointer.y < 500){
                 // TODO add checking to not place finish on a rectangle
-                if( confirmPlacement() )
+                if( confirmPlacement(game.input.mousePointer.x ,game.input.mousePointer.y) )
                     addFinishSprite(game);
 
                 placeFinish_bool = false;
-
-                calculatePath();
             }
         }
 
@@ -190,10 +188,57 @@ function destroyFinishSprite (sprite) {
     sprite.destroy();
 }
 
-function confirmPlacement(){
-    return true;
+function confirmPlacement(mouseX, mouseY){
+    var rectangle1Range = calculateRectangle1Area();
+    var rectangle2Range = calculateRectangle2Area();
+    var rectangle3Range = calculateRectangle3Area();
+
+    if ((rectangle1Range[0][0] < mouseX  && mouseX < rectangle1Range[0][1]) && (rectangle1Range[1][0] < mouseY && mouseY < rectangle1Range[1][1]))
+        return false;
+    else if((rectangle2Range[0][0] < mouseX  && mouseX < rectangle2Range[0][1]) && (rectangle2Range[1][0] < mouseY && mouseY < rectangle2Range[1][1]))
+        return false;
+    else if((rectangle3Range[0][0] < mouseX  && mouseX < rectangle3Range[0][1]) && (rectangle3Range[1][0] < mouseY && mouseY < rectangle3Range[1][1]))
+        return false;
+    else
+        return true;
 }
 
+//200 x 200
+function calculateRectangle1Area(){
+    //GET COORDINATES
+    var thisX = rectangle1.x;
+    var thisY = rectangle1.y;
+    //GENERATE RANGE
+    var xRange = [thisX, thisX+200];
+    var yRange = [thisY, thisY+200];
+
+    return [xRange,yRange]
+
+}
+
+//150 x 150
+function calculateRectangle2Area(){
+    //GET COORDINATES
+    var thisX = rectangle2.x;
+    var thisY = rectangle2.y;
+    //GENERATE RANGE
+    var xRange = [thisX, thisX+150];
+    var yRange = [thisY, thisY+150];
+
+    return [xRange,yRange]
+}
+
+//100 x 100
+function calculateRectangle3Area(){
+    //GET COORDINATES
+    var thisX = rectangle3.x;
+    var thisY = rectangle3.y;
+    //GENERATE RANGE
+    var xRange = [thisX, thisX+100];
+    var yRange = [thisY, thisY+100];
+
+    return [xRange,yRange]
+}
 //CALCULATES PATH BETWEEN POINTS
 function calculatePath(){
 
