@@ -243,9 +243,9 @@ function calculateRectangle3Area(){
 //USING THE RANGES CREATE AN ARRAY OF POINTS THAT DON'T INCLUDE WHERE THE SQUARES ARE
 function generateNodeArray() {
     var nodesArray = [];
-    for (var x = 0; x < 500; x=x+25)
+    for (var x = 0; x < 500; x=x+10)
     {
-        for(var y = 0; y < 500; y=y+25)
+        for(var y = 0; y < 500; y=y+10)
         {
             if(confirmPlacement(x,y))
             {
@@ -256,13 +256,65 @@ function generateNodeArray() {
 
     return nodesArray;
 }
+
+function inNodesArray(nodesArray,thisPoint) {
+
+    if(thisPoint[0] < 0 || thisPoint[1] < 0)
+        return false;
+    for(var x = 0; x< nodesArray.length; x++)
+    {
+        if(thisPoint[0] == nodesArray[x][0] && thisPoint[1] == nodesArray[x][1])
+            return true;
+    }
+    return false;
+}
+function generateMap(nodesArray){
+    var map = {};
+
+    for(var x = 0; x < nodesArray.length; x++)
+    {
+        var thisPoint = nodesArray[x];
+        var thisPointX = thisPoint[0];
+        var thisPointY = thisPoint[1];
+        var addDict = {};
+        var reachableNodesArray = [
+            [thisPointX, thisPointY-10], //North
+            [thisPointX+10, thisPointY-10], //Northeast
+            [thisPointX+10, thisPointY], //East
+            [thisPointX+10, thisPointY+10], //Southeast
+            [thisPointX, thisPointY+10], //South
+            [thisPointX-10, thisPointY+10], //Southwest
+            [thisPointX-10, thisPointY],//West
+            [thisPointX-10, thisPointY-10]//Northwest
+        ];
+        for(var i = 0; i < reachableNodesArray.length; i++)
+        {
+            if(inNodesArray(nodesArray,reachableNodesArray[i]))
+            {
+                addDict[reachableNodesArray[i]]=1;
+            }
+        }
+        map[thisPoint] = addDict;
+    }
+    return map;
+
+
+}
+
+function generatePath(pathToFinish) {
+
+}
 //CALCULATES PATH BETWEEN POINTS
 function calculatePath(){
     if (start !== null && finish !== null)
     {
-        var startCoordinates = start.position;
-        var finishCoordinates = finish.position;
+        var startCoordinates = [start.x,start.y];
+        var finishCoordinates = [finish.x,finish.y];
+        var nearestStartArrayCoordinates = [Math.round(startCoordinates[0]/10)*10,Math.round(startCoordinates[1]/10)*10];
+        var nearestFinishArrayCoordinates = [Math.round(finishCoordinates[0]/10)*10,Math.round(finishCoordinates[1]/10)*10];
         var nodesArray = generateNodeArray();
+        var map = generateMap(nodesArray);
+
 
 
     }
