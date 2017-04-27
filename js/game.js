@@ -32,7 +32,6 @@ var finishCount= 0;
 
 //mapping phaser game to var
 var game = new Phaser.Game(500, 550, Phaser.AUTO, '', { preload: preload, create: create, update: update, render:render });
-
 //Preload
 //-----------------------------------------------------------------------------
 //preload assets needed for game
@@ -61,6 +60,7 @@ function preload() {
 function create() {
 
     game.add.sprite(0,0, 'background');
+
 
     game.world.setBounds(0,0,500,500);
     game.stage.backgroundColor = backgroundColor;
@@ -301,9 +301,51 @@ function generateMap(nodesArray){
 
 }
 
-function generatePath(pathToFinish) {
+function calculateDistanceToGoal(key, endPoint) {
+    var x = Math.abs(key[0] - endPoint[0]);
+    var y = Math.abs(key[1] - endPoint[1]);
+    return Math.sqrt(x*x + y*y);
+}
+function generatePath(startCoordinates,nearestStartPoint,endPoint,map) {
+    var pathToFinish = [startCoordinates,nearestStartPoint];
+    var finishedBool = false;
+    var thisPoint = nearestStartPoint;
+    while(!finishedBool){
+
+        var nearestPointsDistance = [];
+        var nearestPoints = map[thisPoint];
+
+        for (var key in nearestPoints)
+        {
+            key = key.split(",");
+            key[0] = parseInt(key[0]);
+            key[1] = parseInt(key[1]);
+            nearestPointsDistance.push([key,calculateDistanceToGoal(key, endPoint)]);
+        }
+
+        nearestPointsDistance.sort(function(a, b) {
+            return a[1] - b[1];
+        });
+        pathToFinish.push(nearestPointsDistance[0][0]);
+        thisPoint = nearestPointsDistance[0][0];
+        if (thisPoint[0] == endPoint[0] && thisPoint[1] == endPoint[1])
+            finishedBool = true;
+    }
+    return pathToFinish;
+}
+
+function drawLine(pathToFinish) {
+    var graphics = game.add.graphics(0,0);
+    graphics.moveTo(pathToFinish[0][0],pathToFinish[0][1]);
+    graphics.beginFill(0xFF3300);
+    graphics.lineStyle(1, 0xffd900, 1);
+    for (var x = 1; x < pathToFinish.length; x++)
+    {
+        graphics.lineTo(pathToFinish[x][0],pathToFinish[x][1])
+    }
 
 }
+
 //CALCULATES PATH BETWEEN POINTS
 function calculatePath(){
     if (start !== null && finish !== null)
@@ -314,6 +356,9 @@ function calculatePath(){
         var nearestFinishArrayCoordinates = [Math.round(finishCoordinates[0]/10)*10,Math.round(finishCoordinates[1]/10)*10];
         var nodesArray = generateNodeArray();
         var map = generateMap(nodesArray);
+        var pathToFinish = generatePath(startCoordinates,nearestStartArrayCoordinates,nearestFinishArrayCoordinates,map);
+        pathToFinish.push(finishCoordinates);
+        //drawLine(pathToFinish);
 
 
 
