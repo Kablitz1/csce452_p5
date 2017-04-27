@@ -241,5 +241,9 @@ function calculateRectangle3Area(){
 }
 //CALCULATES PATH BETWEEN POINTS
 function calculatePath(){
-
+    if (start !== null && finish !== null)
+    {
+        var startCoordinates = start.coords;
+        var finishCoordinates = finish.coords;
+    }
 }
