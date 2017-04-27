@@ -239,13 +239,30 @@ function calculateRectangle3Area(){
 
     return [xRange,yRange]
 }
+
+//USING THE RANGES CREATE AN ARRAY OF POINTS THAT DON'T INCLUDE WHERE THE SQUARES ARE
+function generateNodeArray() {
+    var nodesArray = [];
+    for (var x = 0; x < 500; x=x+25)
+    {
+        for(var y = 0; y < 500; y=y+25)
+        {
+            if(confirmPlacement(x,y))
+            {
+                nodesArray.push([x,y]);
+            }
+        }
+    }
+
+    return nodesArray;
+}
 //CALCULATES PATH BETWEEN POINTS
 function calculatePath(){
     if (start !== null && finish !== null)
     {
-        var startCoordinates = start.coords;
-        var finishCoordinates = finish.coords;
-
+        var startCoordinates = start.position;
+        var finishCoordinates = finish.position;
+        var nodesArray = generateNodeArray();
 
 
     }
