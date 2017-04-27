@@ -229,8 +229,8 @@ function calculateRectangle1Area(){
     var thisX = rectangle1.x;
     var thisY = rectangle1.y;
     //GENERATE RANGE
-    var xRange = [thisX, thisX+200];
-    var yRange = [thisY, thisY+200];
+    var xRange = [thisX-10, thisX+210];
+    var yRange = [thisY-10, thisY+210];
 
     return [xRange,yRange]
 
@@ -242,8 +242,8 @@ function calculateRectangle2Area(){
     var thisX = rectangle2.x;
     var thisY = rectangle2.y;
     //GENERATE RANGE
-    var xRange = [thisX, thisX+150];
-    var yRange = [thisY, thisY+150];
+    var xRange = [thisX-10, thisX+160];
+    var yRange = [thisY-10, thisY+160];
 
     return [xRange,yRange]
 }
@@ -254,8 +254,8 @@ function calculateRectangle3Area(){
     var thisX = rectangle3.x;
     var thisY = rectangle3.y;
     //GENERATE RANGE
-    var xRange = [thisX, thisX+100];
-    var yRange = [thisY, thisY+100];
+    var xRange = [thisX-10, thisX+110];
+    var yRange = [thisY-10, thisY+110];
 
     return [xRange,yRange]
 }
@@ -347,6 +347,14 @@ function calculateDistanceToGoal(key, endPoint) {
     return Math.sqrt(x*x + y*y);
 }
 
+function inPathToFinish(point, pathToFinish) {
+    for(var x = 0; x < pathToFinish.length; ++x)
+    {
+        if(point[0] === pathToFinish[x][0] && point[1] === pathToFinish[x][1])
+            return true;
+    }
+    return false;
+}
 // RETURN AN ARRAY THAT CONTAINS THE POINTS ALONG THE PATH
 function generatePath(startCoordinates,nearestStartPoint,endPoint,map) {
     // ADD THE FIRST TWO THAT WE KNOW
@@ -375,12 +383,26 @@ function generatePath(startCoordinates,nearestStartPoint,endPoint,map) {
             return a[1] - b[1];
         });
         //PUSH ON THE PATH THE CLOSEST ONE TO THE GOAL
-        pathToFinish.push(nearestPointsDistance[0][0]);
-        //SET THIS POINT TO CLOSER POINT
-        thisPoint = nearestPointsDistance[0][0];
+        var addedBool = false;
+        var indexToAdd = 0;
+        while(!addedBool)
+        {
+            if(indexToAdd === nearestPointsDistance.length)
+                return [];
+            if(inPathToFinish(nearestPointsDistance[indexToAdd][0],pathToFinish))
+                indexToAdd+=1;
+            else
+            {
+                pathToFinish.push(nearestPointsDistance[indexToAdd][0]);
+                //SET THIS POINT TO CLOSER POINT
+                thisPoint = nearestPointsDistance[0][0];
+                addedBool=true;
+            }
+        }
+
 
         //IF WE HAVE REACHED THE GOAL THEN QUIT
-        if (thisPoint[0] == endPoint[0] && thisPoint[1] == endPoint[1])
+         if (thisPoint[0] == endPoint[0] && thisPoint[1] == endPoint[1])
             finishedBool = true;
     }
     //AND RETURN THE PATH
