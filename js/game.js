@@ -245,5 +245,8 @@ function calculatePath(){
     {
         var startCoordinates = start.coords;
         var finishCoordinates = finish.coords;
+
+
+
     }
 }
